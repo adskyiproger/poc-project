@@ -23,7 +23,7 @@ jobs:
         run: |
             pr_number=${{ github.event.pull_request.number }}
             response=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/issues/${pr_number}")
-            labels=$(echo "$response" | jq '.labels | map(.name) | join(",")')
+            labels=$(echo "$response" | jq '.labels | map(.name) | join(",")' | sed 's/"//g')
             echo pr_labels=$labels
             echo pr_labels=$labels >> $GITHUB_OUTPUT
 
