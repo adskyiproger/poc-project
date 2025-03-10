@@ -31,7 +31,7 @@ jobs:
       - name: Check if added label is "🔒 Keep e2e"
         id: label_check
         run: |
-          echo $GITHUB_EVENT_PATH
+          gh pr view ${{ steps.PR.outputs.number }} --json labels | jq '.labels'
           added_label=$(jq -r '.label.name' "$GITHUB_EVENT_PATH")
           if [[ "$added_label" != "🔒 Keep e2e" ]]; then
             echo "Label not found or incorrect, skipping dispatch."
