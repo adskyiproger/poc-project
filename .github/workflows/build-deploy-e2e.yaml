@@ -40,7 +40,8 @@ jobs:
             echo "Correct label added, dispatching deploy workflow."
             echo keep_e2e=true >> $GITHUB_ENV
           fi
-      - if: (steps.PR.outputs.pr_found == 'true' && github.event_name == 'push') || github.event_name == 'pull_request'
+      - if: (steps.PR.outputs.pr_found == 'true' && github.event_name == 'push') 
+      # || github.event_name == 'pull_request'
         run: |
           echo "Running deployment"
           echo ${{steps.PR.outputs.pr_found}}
