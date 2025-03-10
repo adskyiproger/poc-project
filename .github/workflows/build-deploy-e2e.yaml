@@ -21,8 +21,8 @@ jobs:
         id: label_check
         run: |
           [[ ${{github.event_name}} == 'pull_request' ]] && \
-           labels=$(jq -r '.label.name' "$GITHUB_EVENT_PATH") || \
-           labels=${{ steps.PR.outputs.pr_labels }}
+           labels="$(jq -r '.label.name' "$GITHUB_EVENT_PATH")" || \
+           labels="${{ steps.PR.outputs.pr_labels }}"
           echo $labels
           if [[ "${labels}" != *"🔒 Keep e2e"* ]]; then
             echo "Label not found or incorrect, skipping dispatch."
