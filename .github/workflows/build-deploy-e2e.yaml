@@ -2,7 +2,8 @@ name: Build and deploy to e2e on push
 
 on:
   push
-  pull_request
+  pull_request:
+    types: [labeled]
 
 jobs:
   dispatch-deploy:
