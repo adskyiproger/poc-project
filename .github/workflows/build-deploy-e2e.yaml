@@ -19,6 +19,12 @@ jobs:
           added_label=$(jq -r '.label.name' "$GITHUB_EVENT_PATH")
           if [[ "$added_label" != "🔒 Keep e2e" ]]; then
             echo "Label not found or incorrect, skipping dispatch."
-            exit 0
+            echo keep_e2e=false >> $GITHUB_ENV
+          else
+            echo "Correct label added, dispatching deploy workflow."
+            echo keep_e2e=true >> $GITHUB_ENV
           fi
-          echo "Correct label added, dispatching deploy workflow."
+      - run: |
+          echo "Running deployment"
+          echo ${{steps.PR.outputs.pr_found}}
+          echo ${{env.keep_e2e}}
