@@ -33,7 +33,7 @@ jobs:
             GH_TOKEN: ${{ github.token }}
         id: label_check
         run: |
-          labels=$(gh pr view ${{ steps.PR.outputs.number }} --json labels | jq '.labels')
+          labels=$(gh pr view ${{ steps.PR.outputs.number }} --repo ${{ github.repository }} --json labels | jq '.labels')
           
           if [[ "$added_label" != *"🔒 Keep e2e"* ]]; then
             echo "Label not found or incorrect, skipping dispatch."
