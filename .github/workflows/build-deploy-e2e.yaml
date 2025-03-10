@@ -14,13 +14,13 @@ jobs:
     steps:
       - run: echo ${{ github.event }}
       - uses: 8BitJonny/gh-get-current-pr@3.0.0
-        if: github.event == "push"
+        if: github.event == 'push'
         id: PR
 
       - name: Print event type
         run: echo "Event type ${{ github.event_name }}"
       - name: On pull request
-        if: github.event == "pull_request"
+        if: github.event == 'pull_request'
         run: |
           pr_labels=$(jq -r '.label.name' "$GITHUB_EVENT_PATH")
           echo $pr_labels
