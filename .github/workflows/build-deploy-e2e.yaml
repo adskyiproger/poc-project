@@ -26,6 +26,7 @@ jobs:
             echo $response
             labels="$(echo "$response" | jq '.labels | map(.name) | join(",")')"
             echo pr_labels=$labels >> $GITHUB_OUTPUT
+
       - name: Check if added label is "🔒 Keep e2e"
         id: label_check
         run: |
