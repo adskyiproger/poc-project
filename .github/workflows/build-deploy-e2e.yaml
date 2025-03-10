@@ -43,7 +43,6 @@ jobs:
       - if: steps.PR_push.outputs.pr_found == 'true' && github.event_name == 'push' || github.event_name == 'pull_request'
         run: |
             echo "Running deployment"
-            echo ${{steps.PR_push.outputs.pr_found}}
             echo ${{github.event_name}}
             echo ${{env.keep_e2e}}
   
