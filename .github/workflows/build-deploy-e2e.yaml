@@ -4,7 +4,9 @@ on:
   push:
     branches: [ "*" ]
   pull_request:
-    types: [labeled]
+    types:
+        - labeled
+        - opened
 
 jobs:
   dispatch-deploy:
@@ -14,12 +16,10 @@ jobs:
         id: PR
 
       - name: Check if added label is "🔒 Keep e2e"
-        env:
-            GH_TOKEN: ${{ github.token }}
         id: label_check
         run: |
-          labels=$(gh pr view ${{ steps.PR.outputs.number }} --repo ${{ github.repository }} --json labels | jq '.labels')
-          if [[ "$labels" != *"🔒 Keep e2e"* ]]; then
+          echo ${{ steps.PR.outputs.pr_labels }}
+          if [[ "${{ steps.PR.outputs.pr_labels }}" != *"🔒 Keep e2e"* ]]; then
             echo "Label not found or incorrect, skipping dispatch."
             echo keep_e2e=false >> $GITHUB_ENV
           else
