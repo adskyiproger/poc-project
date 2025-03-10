@@ -4,44 +4,45 @@ on:
   push:
     branches: [ "*" ]
   pull_request:
-    types: [labeled]
+    types:
+        - labeled
+        - opened
 
 jobs:
   dispatch-deploy:
     runs-on: ubuntu-24.04
     steps:
-      - uses: 8BitJonny/gh-get-current-pr@3.0.0
-        id: PR
+      - name: Get PR labels on push event
+        uses: 8BitJonny/gh-get-current-pr@3.0.0
+        if: github.event_name == 'push'
+        id: PR_push
 
-      - run: echo "PR ${prNumber} ${prTitle} at ${prUrl} is ${prJSON}"
-        if: steps.PR.outputs.pr_found == 'true'
-        env:
-          # JSON object with the full PR object
-          # toJSON(fromJSON(...pr)) parses it into memory and then format is with pretty-print.
-          prJSON: ${{ toJSON(fromJSON(steps.PR.outputs.pr)) }}
-          # Direct access to common PR properties
-          prNumber: ${{ steps.PR.outputs.number }}
-          prUrl: ${{ steps.PR.outputs.pr_url }}
-          prTitle: ${{ steps.PR.outputs.pr_title }}
-          prBody: ${{ steps.PR.outputs.pr_body }}
-          prCreatedAt: ${{ steps.PR.outputs.pr_created_at }}
-          prMergedAt: ${{ steps.PR.outputs.pr_merged_at }}
-          prClosedAt: ${{ steps.PR.outputs.pr_closed_at }}
-          prLabel: ${{ steps.PR.outputs.pr_labels }}
+      - name: Get PR labels on pull_request event
+        id: PR_pull
+        if: github.event_name == 'pull_request'
+        run: |
+            pr_number=${{ github.event.pull_request.number }}
+            response=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/issues/${pr_number}")
+            labels=$(echo "$response" | jq '.labels | map(.name) | join(",")' | sed 's/"//g')
+            echo pr_labels=$labels >> $GITHUB_OUTPUT
+
       - name: Check if added label is "🔒 Keep e2e"
-        env:
-            GH_TOKEN: ${{ github.token }}
         id: label_check
         run: |
-          labels=$(gh pr view ${{ steps.PR.outputs.number }} --repo ${{ github.repository }} --json labels | jq '.labels')
-          if [[ "$labels" != *"🔒 Keep e2e"* ]]; then
+          [[ ${{github.event_name}} == 'pull_request' ]] && \
+           labels="${{ steps.PR_pull.outputs.pr_labels }}" || \
+           labels="${{ steps.PR_push.outputs.pr_labels }}"
+          echo "Labels found: $labels"
+          if [[ "${labels}" != *"🔒 Keep e2e"* ]]; then
             echo "Label not found or incorrect, skipping dispatch."
             echo keep_e2e=false >> $GITHUB_ENV
           else
             echo "Correct label added, dispatching deploy workflow."
             echo keep_e2e=true >> $GITHUB_ENV
           fi
-      - run: |
-          echo "Running deployment"
-          echo ${{steps.PR.outputs.pr_found}}
-          echo ${{env.keep_e2e}}
+      - if: steps.PR_push.outputs.pr_found == 'true' && github.event_name == 'push' || github.event_name == 'pull_request'
+        run: |
+            echo "Running deployment"
+            echo ${{github.event_name}}
+            echo ${{env.keep_e2e}}
+  
