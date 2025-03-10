@@ -1,0 +1,25 @@
+name: Build and deploy to e2e on push
+
+on:
+  push
+
+jobs:
+  dispatch-deploy:
+    runs-on: ubuntu-24.04
+    steps:
+      steps:
+      - uses: 8BitJonny/gh-get-current-pr@3.0.0
+        id: PR
+
+      - run: echo "PR ${prNumber} ${prTitle} at ${prUrl} is ${prJSON}"
+        if: steps.PR.outputs.pr_found == 'true'
+      - name: Check if added label is "🔒 Keep e2e"
+        id: label_check
+        run: |
+          echo $GITHUB_EVENT_PATH
+          added_label=$(jq -r '.label.name' "$GITHUB_EVENT_PATH")
+          if [[ "$added_label" != "🔒 Keep e2e" ]]; then
+            echo "Label not found or incorrect, skipping dispatch."
+            exit 0
+          fi
+          echo "Correct label added, dispatching deploy workflow."
