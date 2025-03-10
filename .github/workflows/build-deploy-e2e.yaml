@@ -24,7 +24,6 @@ jobs:
             pr_number=${{ github.event.pull_request.number }}
             response=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" "https://api.github.com/repos/${{ github.repository }}/issues/${pr_number}")
             labels=$(echo "$response" | jq '.labels | map(.name) | join(",")' | sed 's/"//g')
-            echo pr_labels=$labels
             echo pr_labels=$labels >> $GITHUB_OUTPUT
 
       - name: Check if added label is "🔒 Keep e2e"
@@ -33,7 +32,6 @@ jobs:
           [[ ${{github.event_name}} == 'pull_request' ]] && \
            labels="${{ steps.PR_pull.outputs.pr_labels }}" || \
            labels="${{ steps.PR_push.outputs.pr_labels }}"
-          echo $labels
           if [[ "${labels}" != *"🔒 Keep e2e"* ]]; then
             echo "Label not found or incorrect, skipping dispatch."
             echo keep_e2e=false >> $GITHUB_ENV
@@ -47,4 +45,3 @@ jobs:
             echo ${{github.event_name}}
             echo ${{env.keep_e2e}}
   
-
