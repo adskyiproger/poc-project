@@ -34,8 +34,8 @@ jobs:
         id: label_check
         run: |
           labels=$(gh pr view ${{ steps.PR.outputs.number }} --repo ${{ github.repository }} --json labels | jq '.labels')
-          
-          if [[ "$added_label" != *"🔒 Keep e2e"* ]]; then
+          echo "Existing labels $labels"
+          if [[ "$labels" != *"🔒 Keep e2e"* ]]; then
             echo "Label not found or incorrect, skipping dispatch."
             echo keep_e2e=false >> $GITHUB_ENV
           else
