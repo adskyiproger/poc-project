@@ -34,7 +34,6 @@ jobs:
         id: label_check
         run: |
           labels=$(gh pr view ${{ steps.PR.outputs.number }} --repo ${{ github.repository }} --json labels | jq '.labels')
-          echo "Existing labels $labels"
           if [[ "$labels" != *"🔒 Keep e2e"* ]]; then
             echo "Label not found or incorrect, skipping dispatch."
             echo keep_e2e=false >> $GITHUB_ENV
@@ -44,7 +43,5 @@ jobs:
           fi
       - run: |
           echo "Running deployment"
-          echo "$GITHUB_EVENT_PATH"
-          cat $GITHUB_EVENT_PATH
           echo ${{steps.PR.outputs.pr_found}}
           echo ${{env.keep_e2e}}
